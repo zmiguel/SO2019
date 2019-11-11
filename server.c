@@ -13,7 +13,11 @@
 #include "util.h"
 
 int main(int argc, char *argv[]){
+    int sair=0, mopt=-1, n;
 
+    msg mensagem;
+
+    srand(time(NULL));
     int fd_servidor;
     /* VERIFICAR SE EXISTE "CP" DO SERVIDOR (access) -- APENAS UM!!!*/
     if(access("CPservidor", F_OK)==0){
@@ -30,15 +34,34 @@ int main(int argc, char *argv[]){
     /* Fazer coisas aqui! */
     do{
 
+        n = read(fd_servidor,&mensagem, sizeof(mensagem));
+
+        if(n == 0){
+            printf("[SERVER] deu merda!\n");
+            sleep(1);
+            continue;
+        }else if(strcmp(mensagem.titulo,"send")==0){
+            printf("funciona!\n");
+            printf("%s\n",mensagem.corpo);    
+        }
+
     }while(true);
 
-    printf("[SERVIDOR] SERVIDOR DESLIGADO\n");
+    printf("[SERVER] SERVIDOR DESLIGADO\n");
 
     /* FECHAR "CP" DO SERVIDOR - MINHA (close) */
     close(fd_servidor);
     /* REMOVER "CP" DO SERVIDOR- MINHA (UNLINK) */
     unlink("CPservidor");
     exit(0);
+}
+
+void printMenu(void){
+    printf("[SERVER] Menu:\n");
+    printf("\t1 - coisas\n");
+    printf("\t0 - SAIR\n");
+
+    printf("> ");
 }
 
 int obtem_rand(int min, int max){

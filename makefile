@@ -12,7 +12,11 @@ LINKERFLAG = -lm
 SRCS := $(wildcard *.c)
 BINS := $(SRCS:%.c=%)
 
+install: 
+	cp ${BINS} /home/zmiguel/TP
+
 all: ${BINS}
+	cp ${BINS} /home/zmiguel/TP
 
 %: %.o
 	@echo "Checking.."
@@ -25,3 +29,4 @@ all: ${BINS}
 clean:
 	@echo "Cleaning up..."
 	rm -rvf *.o ${BINS}
+	

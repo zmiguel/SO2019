@@ -10,6 +10,8 @@ typedef struct msgdef
     int duracao;
     int time_added;
 
+    char addrss[20];
+
     struct topicdef * topico;
     struct msgdef * prox;
 }msg;
