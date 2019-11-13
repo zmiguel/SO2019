@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
             printf("[SERVER] nao da\n");
             sleep(1);
             continue;
-        }else if(strcmp(clResp.cmd,"DESLIGAR")==0){
+        }else if(strcmp(clResp.cmd,"shutdown")==0){
             printf("[SERVER] O servidor vai desligar\n");
             desligarClientes(users);
             //TODO implementar desligar outros clientes!
@@ -86,8 +86,13 @@ int main(int argc, char *argv[]){
             close(fd_cliente);
             //fim da resposta
         }else if(strcmp(clResp.cmd,"list")==0){
-            printf("[SERVER] A listar users...\n");
+            printf("[SERVER] A listar %d clientes...\n",userCounter);
             listusers(users);
+        }else if(strcmp(clResp.cmd,"leaving")==0){
+            printf("[SERVER] Cliente desligado...\n");
+            users=removeUser(users,clResp.fifostr,&userCounter);
+            printf("[SERVER] Cliente removido!\n");
+            uinit = users;
         }
 
     }while(sair==0);
@@ -122,7 +127,7 @@ int verifyUserName(clients *users, int *nUsers, char *username){
 }
 
 clients *addUser(clients *users, int *nUsers, char *username, int pid, char *fifostr){
-    *nUsers++;
+    (*nUsers)++;
     clients *uinit = users;
     if(users == NULL){//adicionar primeiro user
         users = malloc(sizeof(clients));
@@ -175,4 +180,27 @@ void desligarClientes(clients *users){
         kill(users->pid,10);
         users=users->prox;
     }
+}
+
+clients *removeUser(clients *users, char *cp, int *nUsers){
+    (*nUsers)--;
+    clients *uinit = users;
+    clients *prev;
+    //verificar se o user que saiu foi o 1. na lista
+    if(strcmp(users->fifostr,cp)==0){
+        //é o primeiro do lista
+        uinit=users->prox;
+        free(users);
+    }else{
+        //nao é o primeiro da lista
+        while(users!=NULL){
+            prev = users;
+            users = users->prox;
+            if(strcmp(users->fifostr,cp)==0){
+                prev->prox = users->prox;
+                break;
+            }
+        }
+    }
+    return uinit;
 }

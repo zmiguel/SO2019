@@ -6,3 +6,4 @@ char *getUsernameFromfifo(clients *users, char *fifo);
 void listusers(clients *users);
 void closeapp(int sig);
 void desligarClientes(clients *users);
+clients *removeUser(clients *users, char *cp, int *nUsers);

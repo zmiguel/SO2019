@@ -79,6 +79,9 @@ int main(int argc, char *argv[]){
         }
         if(palavra[0]!=NULL){
             if(strcmp(palavra[0],"sair")==0){
+                printf("[CLIENT] Avisar servidor para me remover\n");
+                strcpy(msg2sv.cmd, "leaving");
+                write(fd_servidor, &msg2sv, sizeof(msg2sv));
                 printf("[CLIENT] A sair!\n");
                 sair = 1;
             }else if(strcmp(palavra[0],"send")==0){
@@ -86,9 +89,9 @@ int main(int argc, char *argv[]){
                 strcpy(msg2sv.opts, palavra[1]);
                 /* ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) */
                 i = write(fd_servidor, &msg2sv, sizeof(msg2sv));
-            }else if(strcmp(palavra[0],"desligar")==0){
+            }else if(strcmp(palavra[0],"shutdown")==0){
                 printf("[CLIENT] A Desligar servidor!\n");
-                strcpy(msg2sv.cmd, "DESLIGAR");
+                strcpy(msg2sv.cmd, "shutdown");
                 write(fd_servidor, &msg2sv, sizeof(msg2sv));
                 printf("[CLIENT] A sair!\n");
                 sair = 1;

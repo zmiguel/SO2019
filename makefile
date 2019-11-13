@@ -12,9 +12,6 @@ LINKERFLAG = -lm
 SRCS := $(wildcard *.c)
 BINS := $(SRCS:%.c=%)
 
-install: 
-	cp ${BINS} ~/TP
-
 all: ${BINS}
 	cp ${BINS} ~/TP
 
@@ -25,6 +22,12 @@ all: ${BINS}
 %.o: %.c
 	@echo "Creating object.."
 	${CC} -c $<
+
+cliente: client.o
+
+gestor: server.o
+
+verificador: verificador.o
 
 clean:
 	@echo "Cleaning up..."
