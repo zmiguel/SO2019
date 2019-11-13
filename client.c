@@ -7,14 +7,15 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <ncurses.h>
-//declaraao de funcoes
-#include "dec.h"
+#include <signal.h>
 //estructuras e outras coisas uteis
 #include "util.h"
+//declaraao de funcoes
+#include "dec.h"
 
 int main(int argc, char *argv[]){
     int sair=0, test=-1;
-    char str[80], *palavra[10];
+    char str[80], *palavra[10], *username[30];
     int i;
 
     cl2sv msg2sv;
@@ -30,27 +31,43 @@ int main(int argc, char *argv[]){
     /* CRIAR "CP" DO CLIENTE - MINHA (mkfifo) */
     sprintf(msg2sv.fifostr, "CPcliente_%d", getpid());
     mkfifo(msg2sv.fifostr, 0600); //0600 READ && WRITE
+    msg2sv.pid = getpid();
     /* ABRIR "CP" DO SERVIDOR (open - O_WRONLY) */
     fd_servidor = open("CPservidor", O_WRONLY);
 
     //registar cliente no servidor
-    strcpy(msg2sv.cmd,"register");
-    write(fd_servidor, &msg2sv, sizeof(msg2sv));
-    fd_cliente = open(msg2sv.fifostr,O_RDONLY);
-    read(fd_cliente,&svResp,sizeof(svResp));
-    close(fd_cliente);
-    if(svResp.code==1){
-        printf("[CLIENT] Cliente registado no servidor!\n");
-    }else{
-        printf("[ERROR] Resposta inesperado do servdor.\n");
-        /* FECHAR "CP" DO SERVIDOR (close) */
-        close(fd_servidor);
-        /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
-        unlink(msg2sv.fifostr);
-        exit(1);
-    }
+    do{
+        printf("Nome de Utilizador: ");
+        //get username
+        fgets(username,32,stdin);
+        //build message to server
+        strcpy(msg2sv.cmd,"register");
+        strcpy(msg2sv.opts,username);
+        //send message
+        write(fd_servidor, &msg2sv, sizeof(msg2sv));
+        //read reply
+        fd_cliente = open(msg2sv.fifostr,O_RDONLY);
+        read(fd_cliente,&svResp,sizeof(svResp));
+        close(fd_cliente);
+        //process reply
+        if(svResp.code==1){
+            printf("[CLIENT] Cliente registado no servidor!\n");
+        }else if(svResp.code==2){
+            printf("[ERROR] Nome de Utilizador ja existente\n");
+        }else{
+            printf("[ERROR] Erro inesperado...\nA sair...\n");
+            /* FECHAR "CP" DO SERVIDOR (close) */
+            close(fd_servidor);
+            /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
+            unlink(msg2sv.fifostr);
+            exit(1);
+        }
+    }while(svResp.code!=1);
 
     do{
+        //sinais
+        signal(10,closeapp);
+        //cmd
         printf("> ");
         fgets(str, 80, stdin);
         str[strlen(str)-1]='\0';
@@ -85,6 +102,10 @@ int main(int argc, char *argv[]){
                 close(fd_cliente);
                 //processar resposta
                 printf(svResp.resp);   
+            }else if(strcmp(palavra[0],"list")==0){
+                strcpy(msg2sv.cmd, "list");
+                /* ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) */
+                i = write(fd_servidor, &msg2sv, sizeof(msg2sv));  
             }
         }
 
@@ -94,4 +115,12 @@ int main(int argc, char *argv[]){
     close(fd_servidor);
     /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
     unlink(msg2sv.fifostr);
+}
+
+void closeapp(int sig){
+    char cp[32];
+    sprintf(cp, "CPcliente_%d", getpid());
+    printf("[CLIENT] Vou sair a pedido do SERVIDOR!\n");
+    unlink(cp);
+    exit(0);
 }

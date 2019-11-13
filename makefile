@@ -13,10 +13,10 @@ SRCS := $(wildcard *.c)
 BINS := $(SRCS:%.c=%)
 
 install: 
-	cp ${BINS} /home/zmiguel/TP
+	cp ${BINS} ~/TP
 
 all: ${BINS}
-	cp ${BINS} /home/zmiguel/TP
+	cp ${BINS} ~/TP
 
 %: %.o
 	@echo "Checking.."
