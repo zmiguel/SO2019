@@ -198,6 +198,7 @@ clients *removeUser(clients *users, char *cp, int *nUsers){
             users = users->prox;
             if(strcmp(users->fifostr,cp)==0){
                 prev->prox = users->prox;
+                free(users);
                 break;
             }
         }
