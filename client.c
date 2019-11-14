@@ -109,6 +109,17 @@ int main(int argc, char *argv[]){
                 strcpy(msg2sv.cmd, "list");
                 /* ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) */
                 i = write(fd_servidor, &msg2sv, sizeof(msg2sv));  
+            }else if(strcmp(palavra[0],"verifica")==0){
+                strcpy(msg2sv.cmd, "verifica");
+                strcpy(msg2sv.opts,palavra[1]);
+                /* ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) */
+                i = write(fd_servidor, &msg2sv, sizeof(msg2sv));
+                //ler resposta do servidor
+                /*fd_cliente = open(msg2sv.fifostr,O_RDONLY);
+                read(fd_cliente,&svResp,sizeof(svResp)); 
+                close(fd_cliente);*/
+                //processar resposta
+                //printf(svResp.resp);
             }
         }
 

@@ -34,6 +34,7 @@ int readWordFile(FILE * f, char wdef[][MAXWL], int maxw) {
 int checkWord(char * word, char wdef[][MAXWL], int maxw) {
     int i;
     for (i=0; i<maxw;i++)
+        printf("w1 - %s || w2 - %s\n",word,wdef[i]);
         if (!strcmp(word,wdef[i]))
             return 1;
     return 0;
@@ -80,6 +81,7 @@ int main(int argc, char** argv) {
             justprinted = 0;
         }
     }
+    printf("w - %s\n",word);
     if (!justprinted)
         printf("%d\n",numhits);
     return 0;

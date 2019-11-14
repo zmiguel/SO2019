@@ -7,7 +7,7 @@
 #define TAM_OPTS 128
 #define TAM_RESP 512
 
-typedef struct{
+typedef struct st_mensagem{
     int id;
     char titulo[TAM_TITULO];
     char corpo[TAM_CORPO];
@@ -18,14 +18,14 @@ typedef struct{
     struct mensagem * prox;
 }mensagem;
 
-typedef struct{
+typedef struct st_topic{
     int id;
     char nome[TAM_NOME];
     struct mensagem * mensg;
     struct topic * prox;
 }topic;
 //guardar clientes
-typedef struct{
+typedef struct st_clients{
     int pid;
     char nome[TAM_NOME];
     char fifostr[TAM_NOME];
@@ -40,7 +40,7 @@ struct clmsg{
     char corpo[TAM_CORPO];
     int duracao;
 };
-typedef struct{
+typedef struct st_cl2sv{
     char fifostr[TAM_NOME];
     //base
     int pid;
@@ -52,7 +52,7 @@ typedef struct{
 }cl2sv;
 
 //estructura de dados servidor --> cliente
-typedef struct{
+typedef struct st_sv2cl{
     int code;
     char type[TAM_CMD];
     char resp[TAM_RESP];

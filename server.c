@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
     int userCounter = 0;
 
     srand(time(NULL));
-    int fd_servidor, fd_cliente;
+    int fd_servidor, fd_cliente, fd_child[2];
     /* VERIFICAR SE EXISTE "CP" DO SERVIDOR (access) -- APENAS UM!!!*/
     if(access("CPservidor", F_OK)==0){
         printf("[SERVIDOR] Ja existe um servidor!\n");
@@ -76,7 +76,6 @@ int main(int argc, char *argv[]){
                 close(fd_cliente);
                 //fim resposta
             }
-            
         }else if(strcmp(clResp.cmd,"ping")==0){
             sprintf(msg2cl.resp,"[SV] Olá %s (%s)\n",getUsernameFromfifo(users,clResp.fifostr), clResp.fifostr);
             printf("[SERVER] A responder ao Cliente %s",clResp.fifostr);
@@ -93,6 +92,22 @@ int main(int argc, char *argv[]){
             users=removeUser(users,clResp.fifostr,&userCounter);
             printf("[SERVER] Cliente removido!\n");
             uinit = users;
+        }else if(strcmp(clResp.cmd,"verifica")==0){
+            printf("[SERVER] A verificar '%s'\n",clResp.opts);
+            pipe(fd_child);
+            switch(fork()){
+                case 0://child
+                    close(fd_child[1]);
+                    dup2(fd_child[0], STDIN_FILENO);
+                    close(fd_child[0]);
+                    execl("verificador", "./verificador", "words.txt", NULL);
+                default://me
+                    close(fd_child[0]);
+                    write(fd_child[1], clResp.opts, sizeof(clResp.opts));
+                    close(fd_child[1]);
+                    wait(NULL);
+            }
+            
         }
 
     }while(sair==0);
