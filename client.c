@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[]){
     int sair=0, test=-1;
-    char str[80], *palavra[10], *username[30];
+    char str[80], *palavra[10], username[30];
     int i;
 
     cl2sv msg2sv;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]){
                 i = write(fd_servidor, &msg2sv, sizeof(msg2sv));  
             }else if(strcmp(palavra[0],"verifica")==0){
                 strcpy(msg2sv.cmd, "verifica");
-                strcpy(msg2sv.opts,palavra[1]);
+                strcpy(msg2sv.opts, palavra[1]);
                 /* ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) */
                 i = write(fd_servidor, &msg2sv, sizeof(msg2sv));
                 //ler resposta do servidor

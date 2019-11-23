@@ -14,16 +14,18 @@ typedef struct st_mensagem{
     int duracao;
     int time_added;
 
-    struct topic * topico;
-    struct mensagem * prox;
+    struct st_topic * topico;
+    struct st_mensagem * prox;
 }mensagem;
 
 typedef struct st_topic{
     int id;
     char nome[TAM_NOME];
-    struct mensagem * mensg;
-    struct topic * prox;
+    struct st_mensagem * mensg;
+    struct st_topic * prox;
 }topic;
+
+
 //guardar clientes
 typedef struct st_clients{
     int pid;
@@ -31,7 +33,7 @@ typedef struct st_clients{
     char fifostr[TAM_NOME];
     int topics[TAM_SUB];
 
-    struct clients *prox;
+    struct st_clients *prox;
 }clients;
 
 //estructura dados de cliente --> servidor

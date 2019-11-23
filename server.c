@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <ncurses.h>
 #include <signal.h>
@@ -27,7 +29,7 @@ int main(int argc, char *argv[]){
     int userCounter = 0;
 
     srand(time(NULL));
-    int fd_servidor, fd_cliente, fd_child[2];
+    int fd_servidor, fd_cliente;
     /* VERIFICAR SE EXISTE "CP" DO SERVIDOR (access) -- APENAS UM!!!*/
     if(access("CPservidor", F_OK)==0){
         printf("[SERVIDOR] Ja existe um servidor!\n");
@@ -93,21 +95,7 @@ int main(int argc, char *argv[]){
             printf("[SERVER] Cliente removido!\n");
             uinit = users;
         }else if(strcmp(clResp.cmd,"verifica")==0){
-            printf("[SERVER] A verificar '%s'\n",clResp.opts);
-            pipe(fd_child);
-            switch(fork()){
-                case 0://child
-                    close(fd_child[1]);
-                    dup2(fd_child[0], STDIN_FILENO);
-                    close(fd_child[0]);
-                    execl("verificador", "./verificador", "words.txt", NULL);
-                default://me
-                    close(fd_child[0]);
-                    write(fd_child[1], clResp.opts, sizeof(clResp.opts));
-                    close(fd_child[1]);
-                    wait(NULL);
-            }
-            
+            verificador(clResp.opts);
         }
 
     }while(sair==0);
@@ -168,7 +156,7 @@ clients *addUser(clients *users, int *nUsers, char *username, int pid, char *fif
 
 char *getUsernameFromfifo(clients *users, char *fifo){
     clients *uinit = users;
-    char send[100];
+    char *send = malloc(sizeof(char)*100);
     while(users!=NULL){
         if(strcmp(users->fifostr,fifo)==0){
             strcpy(send,users->nome);
@@ -219,4 +207,33 @@ clients *removeUser(clients *users, char *cp, int *nUsers){
         }
     }
     return uinit;
+}
+
+void verificador(char *verify){
+    int fd_child[2], estado;
+
+    pipe(fd_child);
+    switch(fork()){
+        case 0://child
+            /*close(fd_child[1]);
+            dup2(fd_child[0], STDIN_FILENO);
+            close(fd_child[0]);*/
+            close(0);
+            dup(fd_child[0]);
+            close(fd_child[1]);
+            close(fd_child[0]);
+            execl("verificador", "./verificador", "words.txt", NULL);
+            break;
+        default://me
+            /*close(fd_child[0]);
+            write(fd_child[1], clResp.opts, sizeof(clResp.opts));
+            close(fd_child[1]);*/
+            close(1);
+            dup(fd_child[1]);
+            printf("%s\n",verify);
+            close(fd_child[0]);
+            close(fd_child[1]);
+            close(1);
+            wait(&estado);
+    }
 }
