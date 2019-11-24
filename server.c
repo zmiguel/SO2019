@@ -60,7 +60,6 @@ int main(int argc, char *argv[]){
             printf("funciona!\n");
             printf("%s\n",clResp.opts);    
         }else if(strcmp(clResp.cmd,"register")==0){
-            clResp.opts[strlen(clResp.opts)-1]='\0';
             if(verifyUserName(users,&userCounter,clResp.opts)==1){
                 msg2cl.code=2;
                 //responde

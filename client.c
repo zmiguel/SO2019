@@ -36,33 +36,95 @@ int main(int argc, char *argv[]){
     fd_servidor = open("CPservidor", O_WRONLY);
 
     //registar cliente no servidor
-    do{
-        printf("Nome de Utilizador: ");
-        //get username
-        fgets(username,32,stdin);
-        //build message to server
-        strcpy(msg2sv.cmd,"register");
-        strcpy(msg2sv.opts,username);
-        //send message
-        write(fd_servidor, &msg2sv, sizeof(msg2sv));
-        //read reply
-        fd_cliente = open(msg2sv.fifostr,O_RDONLY);
-        read(fd_cliente,&svResp,sizeof(svResp));
-        close(fd_cliente);
-        //process reply
-        if(svResp.code==1){
-            printf("[CLIENT] Cliente registado no servidor!\n");
-        }else if(svResp.code==2){
-            printf("[ERROR] Nome de Utilizador ja existente\n");
-        }else{
-            printf("[ERROR] Erro inesperado...\nA sair...\n");
-            /* FECHAR "CP" DO SERVIDOR (close) */
-            close(fd_servidor);
-            /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
-            unlink(msg2sv.fifostr);
-            exit(1);
-        }
-    }while(svResp.code!=1);
+    if(argc == 2){// nome de utilizador inserido como argumento
+        char uname[32];
+        i=0;
+        do{
+            strcpy(uname,argv[1]);
+            if(i==0){//registo username sem numeros
+                strcpy(msg2sv.cmd,"register");
+                strcpy(msg2sv.opts,uname);
+                //send message
+                write(fd_servidor, &msg2sv, sizeof(msg2sv));
+                //read reply
+                fd_cliente = open(msg2sv.fifostr,O_RDONLY);
+                read(fd_cliente,&svResp,sizeof(svResp));
+                close(fd_cliente);
+                //process reply
+                if(svResp.code==1){
+                    printf("[CLIENT] Cliente registado no servidor!\n");
+                    printf("[CLIENT] O Teu Username: %s\n",uname);
+                }else if(svResp.code==2){
+                    printf("[ERROR] Nome de Utilizador ja existente...\n");
+                    printf("[CLIENT] A tentar outro username...\n");
+                    i++;
+                }else{
+                    printf("[ERROR] Erro inesperado...\nA sair...\n");
+                    /* FECHAR "CP" DO SERVIDOR (close) */
+                    close(fd_servidor);
+                    /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
+                    unlink(msg2sv.fifostr);
+                    exit(1);
+                }
+            }else{// username ja existente... adicionar numeros
+                sprintf(uname,"%s%d", argv[1], i); //gerar username novo
+                //registar
+                strcpy(msg2sv.cmd,"register");
+                strcpy(msg2sv.opts,uname);
+                //send message
+                write(fd_servidor, &msg2sv, sizeof(msg2sv));
+                //read reply
+                fd_cliente = open(msg2sv.fifostr,O_RDONLY);
+                read(fd_cliente,&svResp,sizeof(svResp));
+                close(fd_cliente);
+                //process reply
+                if(svResp.code==1){
+                    printf("[CLIENT] Cliente registado no servidor!\n");
+                    printf("[CLIENT] O Teu Username: %s\n",uname);
+                }else if(svResp.code==2){
+                    printf("[ERROR] Nome de Utilizador ja existente...\n");
+                    printf("[CLIENT] A tentar outro username...\n");
+                    i++;
+                }else{
+                    printf("[ERROR] Erro inesperado...\nA sair...\n");
+                    /* FECHAR "CP" DO SERVIDOR (close) */
+                    close(fd_servidor);
+                    /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
+                    unlink(msg2sv.fifostr);
+                    exit(1);
+                }
+            }
+        }while(svResp.code!=1);
+    }else{// argumentos diferente de 2
+        do{
+            printf("Nome de Utilizador: ");
+            //get username
+            fgets(username,32,stdin);
+            username[strlen(username)-1]='\0';
+            //build message to server
+            strcpy(msg2sv.cmd,"register");
+            strcpy(msg2sv.opts,username);
+            //send message
+            write(fd_servidor, &msg2sv, sizeof(msg2sv));
+            //read reply
+            fd_cliente = open(msg2sv.fifostr,O_RDONLY);
+            read(fd_cliente,&svResp,sizeof(svResp));
+            close(fd_cliente);
+            //process reply
+            if(svResp.code==1){
+                printf("[CLIENT] Cliente registado no servidor!\n");
+            }else if(svResp.code==2){
+                printf("[ERROR] Nome de Utilizador ja existente\n");
+            }else{
+                printf("[ERROR] Erro inesperado...\nA sair...\n");
+                /* FECHAR "CP" DO SERVIDOR (close) */
+                close(fd_servidor);
+                /* REMOVER "cp" DO CLIENTE - EU (UNLINK) */
+                unlink(msg2sv.fifostr);
+                exit(1);
+            }
+        }while(svResp.code!=1);
+    }
 
     do{
         //sinais
